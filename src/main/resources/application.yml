@@ -1,0 +1,18 @@
+spring:
+  datasource:
+    url: jdbc:mariadb://54.180.119.189:3306/testDB
+    username: testuser
+    password: 1234
+    driver-class-name: org.mariadb.jdbc.Driver
+  jpa:
+    hibernate:
+      ddl-auto: create
+    properties:
+      hibernate:
+        #        show_sql: true
+        format_sql: true
+logging.level:
+  org.hibernate.SQL: debug
+
+org.hibernate.orm.jdbc.bind : trace
+
