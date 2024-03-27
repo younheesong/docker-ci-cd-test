@@ -47,9 +47,9 @@ jobs:
         port: 22
         script: |
           sudo docker ps
-          sudo docker rm -f demo-container
+          sudo docker rm -f demo_container
           sudo docker pull ${{ secrets.DOCKER_USERNAME }}/demo:${{ github.sha }}  
-          sudo docker run --name demo-container -d -p 8080:8080 ${{ secrets.DOCKER_USERNAME }}/demo:${{ github.sha }}  
+          sudo docker run --name demo_container -d -p 8080:8080 ${{ secrets.DOCKER_USERNAME }}/demo:${{ github.sha }}  
           sudo docker image prune -f
    
   
