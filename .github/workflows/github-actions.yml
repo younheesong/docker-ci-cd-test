@@ -48,6 +48,6 @@ jobs:
         script: |
           sudo docker ps
           sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/demo:${{ github.sha }}  
-          sudo docker stop demo_container
+          sudo docker rm -f demo_container
           sudo docker run -d --rm --name demo_container  -p 8080:8080 ${{ secrets.DOCKERHUB_USERNAME }}/demo:${{ github.sha }}  
           sudo docker image prune -f
