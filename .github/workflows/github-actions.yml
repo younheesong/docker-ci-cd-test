@@ -37,7 +37,7 @@ jobs:
         push: true  # 이미지를 레지스트리에 푸시합니다.
         tags: ${{ secrets.DOCKERHUB_USERNAME }}/demo:${{ github.sha }}  
 
-    - name: Deploy to dev
+    - name: Deploy to ec2
       uses: appleboy/ssh-action@master
       id: deploy-dev
       with:
