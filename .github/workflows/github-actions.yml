@@ -10,11 +10,14 @@ jobs:
   build-and-push:
     runs-on: ubuntu-latest  
     # 가장 최신의 Ubuntu 러너를 사용합니다.
-
+  
     steps:
-    - name: Checkout Repository
-      uses: actions/checkout@v2  
-      # 현재 리포지토리를 체크아웃합니다.
+    - uses: actions/checkout@v3
+    - name: Set up JDK 11
+      uses: actions/setup-java@v3
+      with:
+        java-version: '11'
+        distribution: 'temurin'
 
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v1  
@@ -33,26 +36,21 @@ jobs:
       with:  
         push: true  # 이미지를 레지스트리에 푸시합니다.
         tags: ${{ secrets.DOCKERHUB_USERNAME }}/demo:${{ github.sha }}  
+
+    - name: Deploy to dev
+      uses: appleboy/ssh-action@master
+      id: deploy-dev
+      if: contains(github.ref, 'develop')
+      with:
+        host: ${{ secrets.HOST_DEV }} # EC2 퍼블릭 IPv4 DNS
+        username: ${{ secrets.USERNAME }} # ubuntu
+        password: ${{ secrets.PASSWORD }}
+        port: 22
+        key: ${{ secrets.PRIVATE_KEY }}
+        script: |
+          sudo docker ps
+          sudo docker pull ${{ secrets.DOCKER_USERNAME }}/docker-test-dev
+          sudo docker run -d -p 8081:8081 ${{ secrets.DOCKER_USERNAME }}/docker-test-dev
+          sudo docker image prune -f
    
-  run-docker-image-on-ec2:
-    # build-docker-image (위)과정이 완료되어야 실행됩니다.
-    needs: build-and-push
-    runs-on: self-hosted
-
-    steps:
-      # 1. 최신 이미지를 풀받습니다
-      - name: docker pull
-        run: sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/demo:${{ github.sha }}  
-      
-      # 2. 기존의 컨테이너를 중지시킵니다
-      - name: docker stop container
-        run: sudo docker stop $(sudo docker ps -q) 2>/dev/null || true
-
-      # 3. 최신 이미지를 컨테이너화하여 실행시킵니다
-      - name: docker run new container
-        run: sudo docker run --name github-actions-demo --rm -d -p 8080:8080 ${{ secrets.DOCKERHUB_USERNAME }}/demo:${{ github.sha }}  
-
-      # 4. 미사용 이미지를 정리합니다
-      - name: delete old docker image
-        run: sudo docker system prune -f
-
+  
